@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""GitHub Action runner for the Vyges metadata scorer.
+"""© 2026 Vyges/TrustStix Inc.
+Licensed under the Apache License, Version 2.0. See LICENSE/NOTICE.
+
+GitHub Action runner for the Vyges metadata scorer.
 
 Reads inputs from environment variables (set by action.yml), calls
 ``scorer.score_metadata``, writes a job summary table, exposes outputs
@@ -13,7 +16,7 @@ import os
 import sys
 from pathlib import Path
 
-# scorer.py lives next to this file (vendored from soc-generator).
+# scorer.py lives next to this file.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from scorer import DIMENSIONS, score_metadata  # noqa: E402
 

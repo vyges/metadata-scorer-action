@@ -82,7 +82,13 @@ VYGES_SCORER_FILE=path/to/vyges-metadata.json python scorer_action.py
 
 ## License
 
-Apache-2.0 © Vyges. The vendored scorer module (`scorer.py`) tracks the
-canonical implementation in
-[vyges/soc-generator](https://github.com/vyges/soc-generator) — both copies
-must stay in lockstep on the rubric.
+© 2026 Vyges/TrustStix Inc.
+Licensed under the Apache License, Version 2.0 — see [`LICENSE`](LICENSE)
+and [`NOTICE`](NOTICE).
+
+The scorer module (`scorer.py`) is the canonical Vyges integration-readiness
+rubric.
+
+Bug reports, rubric proposals, commercial inquiries, or anything else:
+please use **https://vyges.com/contact** — that form routes to the GitHub
+Issues page we track.

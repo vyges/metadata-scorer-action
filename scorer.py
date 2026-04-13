@@ -1,10 +1,10 @@
-"""Score the quality of vyges-metadata.json for each IP in a SoC spec.
+"""© 2026 Vyges/TrustStix Inc.
+Licensed under the Apache License, Version 2.0. See LICENSE/NOTICE.
 
-The soc-generator already resolves every IP's vyges-metadata.json during
-elaboration. This module scores each resolved metadata on completeness
-and integration-readiness, so the SoC orchestrator can see up front
-which IPs carry hidden integration cost (missing interfaces, no
-verification data, absent ASIC/FPGA readiness fields).
+Score the quality of a vyges-metadata.json file on completeness and
+integration-readiness, so SoC orchestrators and downstream tooling can
+see up front which IPs carry hidden integration cost (missing
+interfaces, no verification data, absent ASIC/FPGA readiness fields).
 
 Scoring rubric (100 points):
 - Identity       (20): name, version, license, description, maturity
@@ -207,72 +207,6 @@ def score_metadata(md: Optional[Dict[str, Any]]) -> Tuple[int, Dict[str, int], L
         gaps.extend(f"{name}: {item}" for item in g)
         total += pts
     return total, breakdown, gaps
-
-
-def score_soc(
-    spec: Dict[str, Any],
-    resolver: Any,
-    spec_path: Optional[Any] = None,
-) -> SocMetadataReport:
-    """Score every IP referenced in the spec.
-
-    Walks soc.cpu + soc.peripherals[] and resolves each ip_name through
-    the provided resolver. Unresolved IPs get a zero score and 'Unresolved'
-    tier — they are the highest-priority integration risks.
-
-    Derived specs (edge_sensor_dsp, edge_sensor_ai, ...) use the
-    ``extends`` + ``peripherals_add`` model documented in parser.py.
-    This function handles both:
-      - If ``spec_path`` is provided AND the spec has an ``extends`` key,
-        the full extends-chain is resolved via SocSpecParser.
-      - Otherwise, any ``peripherals_add`` entries are merged into
-        ``peripherals`` in-place (no base-spec lookup).
-
-    The parser route is preferred when callers have the spec path; the
-    in-place route is a lightweight fallback for tests and callers that
-    only hold the raw dict.
-    """
-    # 1. Resolve extends chain when a path is available
-    if spec_path is not None and isinstance(spec, dict) and "extends" in spec:
-        try:
-            from pathlib import Path as _Path
-            from soc_generator.parser import SocSpecParser
-            spec = SocSpecParser(_Path(spec_path)).load()
-        except Exception:
-            # Fall through to raw-spec handling — better partial than broken
-            pass
-
-    soc = dict(spec.get("soc", {}))  # shallow copy so we can mutate peripherals
-
-    # 2. Merge peripherals_add into peripherals when present (derived specs
-    #    that we didn't route through the parser — typically tests or
-    #    callers without the spec path).
-    peripherals = list(soc.get("peripherals") or [])
-    peripherals.extend(soc.get("peripherals_add") or [])
-
-    report = SocMetadataReport(soc_name=soc.get("name", "unknown"))
-
-    targets: List[Tuple[str, str]] = []  # (instance, ip_name)
-    cpu = soc.get("cpu") or {}
-    if cpu.get("ip"):
-        targets.append((cpu.get("instance", cpu["ip"]), cpu["ip"]))
-    for p in peripherals:
-        if p.get("ip"):
-            targets.append((p.get("instance", p["ip"]), p["ip"]))
-
-    for instance, ip_name in targets:
-        md: Optional[Dict[str, Any]] = None
-        try:
-            md = resolver.resolve(ip_name) if resolver else None
-        except Exception:
-            md = None
-        total, breakdown, gaps = score_metadata(md)
-        report.ips.append(IpScore(
-            ip_name=ip_name, instance=instance,
-            resolved=md is not None,
-            score=total, breakdown=breakdown, gaps=gaps,
-        ))
-    return report
 
 
 # ── Report rendering ────────────────────────────────────────────────────────
