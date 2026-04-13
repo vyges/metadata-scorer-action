@@ -1,0 +1,97 @@
+{
+  "name": "riscduino-pwm",
+  "version": "0.1.0",
+  "x-version": "1.0.0",
+  "description": "Silicon-proven 6-channel PWM controller with configurable glitch filter, interrupt support, and GPIO input capture. Extracted from dineshannayya/riscduino \u2014 validated on Caravel chipIgnite shuttle. Features: 6 independent PWM channels, per-channel duty cycle and period registers, digital glitch filter for noisy environments, GPIO input capture mode (useful for quadrature encoder feedback), interrupt on period completion.",
+  "license": "Apache-2.0",
+  "design_type": [
+    "digital"
+  ],
+  "maturity": "imported",
+  "target": [
+    "asic",
+    "fpga"
+  ],
+  "template": "standalone@1.0.0",
+  "created": "2026-04-07T05:14:34Z",
+  "updated": "2026-04-07T05:14:34Z",
+  "categories": [
+    {
+      "main_category": "Interface Controllers",
+      "sub_categories": [
+        "Motor Control"
+      ]
+    }
+  ],
+  "keywords": [
+    "pwm",
+    "motor-control",
+    "glitch-filter",
+    "input-capture",
+    "riscduino",
+    "silicon-proven",
+    "caravel"
+  ],
+  "source": {
+    "type": "git",
+    "url": "https://github.com/dineshannayya/riscduino",
+    "ip_path": "verilog/rtl/pwm/src",
+    "rtl_path": "rtl",
+    "rtl_files": [
+      "rtl/pwm_top.sv",
+      "rtl/pwm.sv",
+      "rtl/pwm_core.sv",
+      "rtl/pwm_blk_reg.sv",
+      "rtl/pwm_glbl_reg.sv",
+      "rtl/pwm_cfg_dglitch.sv"
+    ]
+  },
+  "interfaces": [
+    {
+      "type": "bus",
+      "direction": "input",
+      "protocol": "register-bus",
+      "description": "Simple register bus interface (cs/wr/addr/wdata/rdata/ack) \u2014 needs TL-UL or APB adapter for SoC integration"
+    },
+    {
+      "type": "io",
+      "direction": "output",
+      "protocol": "PWM",
+      "width": 6,
+      "description": "6 PWM waveform outputs"
+    },
+    {
+      "type": "io",
+      "direction": "input",
+      "protocol": "GPIO",
+      "width": 8,
+      "description": "8 GPIO inputs for capture mode"
+    },
+    {
+      "type": "interrupt",
+      "direction": "output",
+      "width": 1,
+      "description": "PWM interrupt output"
+    }
+  ],
+  "parameters": [
+    {
+      "parameter_info": {
+        "name": "NUM_PWM",
+        "type": "int",
+        "description": "Number of PWM channels (fixed at 6 in current implementation)"
+      },
+      "constraints": {
+        "default": 6
+      }
+    }
+  ],
+  "branding": {
+    "provider": "Vyges IP Catalog",
+    "website": "https://github.com/vyges-ip/riscduino-pwm"
+  },
+  "community": {
+    "issues": "https://github.com/vyges-ip/riscduino-pwm/issues",
+    "contributions": "https://github.com/vyges-ip/riscduino-pwm/pulls"
+  }
+}

@@ -1,0 +1,53 @@
+name: Self-test
+
+on:
+  push:
+    branches: [main]
+  pull_request: {}
+
+jobs:
+  perfect-fixture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Score perfect fixture
+        id: score
+        uses: ./
+        with:
+          file: tests/fixtures/perfect.json
+          threshold: 100
+      - name: Verify outputs
+        run: |
+          test "${{ steps.score.outputs.score }}" = "100"
+          test "${{ steps.score.outputs.tier }}" = "Good"
+
+  incomplete-fixture-fails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Score incomplete fixture (must fail at threshold 80)
+        id: score
+        continue-on-error: true
+        uses: ./
+        with:
+          file: tests/fixtures/incomplete.json
+          threshold: 80
+      - name: Verify it failed
+        run: |
+          test "${{ steps.score.outcome }}" = "failure"
+          test "${{ steps.score.outputs.tier }}" = "High-risk"
+
+  incomplete-fixture-no-threshold:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Score incomplete fixture with no threshold (advisory only)
+        id: score
+        uses: ./
+        with:
+          file: tests/fixtures/incomplete.json
+          # threshold defaults to 0 → never fail
+      - name: Verify it passed but reported low score
+        run: |
+          test "${{ steps.score.outcome }}" = "success"
+          test "${{ steps.score.outputs.score }}" -lt 60

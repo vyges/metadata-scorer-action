@@ -1,0 +1,51 @@
+name: 'Vyges Metadata Scorer'
+description: 'Score a vyges-metadata.json against the Vyges integration-readiness rubric (0-100) and optionally fail CI when below a threshold.'
+author: 'Vyges'
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+inputs:
+  file:
+    description: 'Path to vyges-metadata.json'
+    required: false
+    default: 'vyges-metadata.json'
+  threshold:
+    description: 'Fail the action when score < threshold. Set to 0 to never fail.'
+    required: false
+    default: '0'
+  summary:
+    description: 'Write a job summary table (true/false).'
+    required: false
+    default: 'true'
+
+outputs:
+  score:
+    description: 'Total score (0-100).'
+    value: ${{ steps.score.outputs.score }}
+  tier:
+    description: 'Good (>=80), Medium (60-79), or High-risk (<60).'
+    value: ${{ steps.score.outputs.tier }}
+  breakdown:
+    description: 'Per-dimension breakdown as JSON.'
+    value: ${{ steps.score.outputs.breakdown }}
+  gaps:
+    description: 'List of missing fields as JSON array.'
+    value: ${{ steps.score.outputs.gaps }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Score metadata
+      id: score
+      shell: bash
+      env:
+        VYGES_SCORER_FILE: ${{ inputs.file }}
+        VYGES_SCORER_THRESHOLD: ${{ inputs.threshold }}
+        VYGES_SCORER_SUMMARY: ${{ inputs.summary }}
+      run: python "${{ github.action_path }}/scorer_action.py"
